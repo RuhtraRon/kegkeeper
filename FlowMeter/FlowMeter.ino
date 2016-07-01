@@ -5,8 +5,8 @@ the black wire to common ground
 and the yellow sensor wire to pin #2
 
 **********************************************************/
-#include "LiquidCrystal.h"
-LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
+//#include "LiquidCrystal.h"
+//LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
 
 // which pin to use for reading the sensor? can use any pin!
 #define FLOWSENSORPIN 2
@@ -53,7 +53,7 @@ void useInterrupt(boolean v) {
 void setup() {
    Serial.begin(9600);
    Serial.print("Flow sensor test!");
-   lcd.begin(16, 2);
+//   lcd.begin(16, 2);
    
    pinMode(FLOWSENSORPIN, INPUT);
    digitalWrite(FLOWSENSORPIN, HIGH);
@@ -63,11 +63,11 @@ void setup() {
 
 void loop()                     // run over and over again
 { 
-  lcd.setCursor(0, 0);
-  lcd.print("Pulses:"); lcd.print(pulses, DEC);
-  lcd.print(" Hz:");
-  lcd.print(flowrate);
-  //lcd.print(flowrate);
+//  lcd.setCursor(0, 0);
+//  lcd.print("Pulses:"); lcd.print(pulses, DEC);
+//  lcd.print(" Hz:");
+//  lcd.print(flowrate);
+//  //lcd.print(flowrate);
   Serial.print("Freq: "); Serial.println(flowrate);
   Serial.print("Pulses: "); Serial.println(pulses, DEC);
   
@@ -88,8 +88,8 @@ void loop()                     // run over and over again
   liters /= 60.0;
 */
   Serial.print(liters); Serial.println(" Liters");
-  lcd.setCursor(0, 1);
-  lcd.print(liters); lcd.print(" Liters        ");
+//  lcd.setCursor(0, 1);
+//  lcd.print(liters); lcd.print(" Liters        ");
  
   delay(100);
 }
