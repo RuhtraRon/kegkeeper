@@ -1,10 +1,9 @@
 #include <ESP8266WiFi.h>
-#include <EEPROM.h>
-#include <DNSServer.h>
+//#include <EEPROM.h>
+//#include <DNSServer.h>
 #include <ESP8266WebServer.h>
 #include "WiFiManager.h"
-
-//#include <Ticker.h>
+#include <Ticker.h>
 
 /////////////////////
 // Pin Definitions //
@@ -24,11 +23,12 @@
 
 const int LED_PIN = D4; // ESP's blue led
 //const int ANALOG_PIN = A0; // The only analog pin
-//ADC_MODE(ADC_VCC);
+ADC_MODE(ADC_VCC);
 const int DIGITAL_PIN = D3; // Digital pin to be read
 const int OPEN_VALVE = D1;
 
 WiFiServer server(80);
+Ticker ticker;
 
 void initHardware()
 {
@@ -38,6 +38,9 @@ void initHardware()
   pinMode(OPEN_VALVE, OUTPUT);
   digitalWrite(LED_PIN, HIGH); // Turn led off
   digitalWrite(OPEN_VALVE, LOW); // turn valve off (closed)
+  pinMode(FLOWSENSORPIN, INPUT);
+  digitalWrite(FLOWSENSORPIN, HIGH);
+  lastflowpinstate = digitalRead(FLOWSENSORPIN);
 }
 
 void flashLED(int Qty,int Dur){
@@ -53,16 +56,16 @@ void flashLED(int Qty,int Dur){
 void setup() 
 {
   initHardware();
-  FMsetup();
+  ticker.attach_ms(1,ISRflowreader);
   WiFiManager wifiManager;
-  //reset settings - for testing
-  //wifiManager.resetSettings();
+//  //reset settings - for testing
+//  wifiManager.resetSettings();
   wifiManager.autoConnect("kegkeeper");
 //    ESP.reset();
 //    delay(1000);
 
   server.begin();
-  flashLED(5,100);
+  flashLED(3,100);
 }
 
 void loop() 
@@ -90,19 +93,16 @@ void loop()
     val = -2; // Will print pin reads
   else if (req.indexOf("/home") != -1)
     val = -3; // Will print home page
-  else if (req.indexOf("/motor/fwd") != -1)
-    val = -4; // Will run motor forward
-  else if (req.indexOf("/motor/rev") != -1)
-    val = -5; // Will run motor reverse
-  else if (req.indexOf("/motor/close") != -1)
-    val = -6; // Enter SSID/Password, Change to Server Mode 
-  else if (req.indexOf("/motor/open") != -1)
-    val = -7; // try to change to server mode 
+  else if (req.indexOf("/valve/open") != -1)
+    val = -4; // Will open the valve
+  else if (req.indexOf("/valve/close") != -1)
+    val = -5; // Will Close the valve
+//  else if (req.indexOf("/motor/close") != -1)
+//    val = -6; // Enter SSID/Password, Change to Server Mode 
+//  else if (req.indexOf("/motor/open") != -1)
+//    val = -7; // try to change to server mode 
   // Otherwise request will be invalid. We'll say as much in HTML
 
-  // Set GPIO5 according to the request
-  if (val >= 0)
-    digitalWrite(LED_PIN, val);
 
   client.flush();
 
@@ -113,78 +113,62 @@ void loop()
   // If we're setting the LED, print out a message saying we did
   if (val >= 0)
   {
+    digitalWrite(LED_PIN, val);
     s += "LED is now ";
     s += (val)?"off":"on";
+    
   }
   else if (val == -2)
   { // If we're reading pins, print out those values:
-//    s += "Analog Pin = ";
-//    //s += String(analogRead(ANALOG_PIN));
-//    s += String(ESP.getVcc());
-//    s += "<br>"; // Go to the next line.
-//    s += "Digital Pin 14 = ";
-//    s += String(digitalRead(DIGITAL_PIN));
-    //checker.detach();
-    s += "Starting AutoMode";
-//    stayAwake = 0;
-//    EEPROM.write(stayAwakeEE, stayAwake);
-//    positionOpen = 1; //set position to Opened
-//    EEPROM.write(positionOpenEE, positionOpen);
-
+    s += "Analog Pin = ";
+    //s += String(analogRead(ANALOG_PIN));
+    s += String(ESP.getVcc());
+    s += "<br>"; // Go to the next line.
+    s += "Digital Pin 14 = ";
+    s += String(digitalRead(DIGITAL_PIN));
+    FMprint();
   }
   else if (val == -3)
   { //Present easy link options for other val's
-    s += "<a href='/read'>Start the AutoMode</a>";
+    s += "<a href='/read'>Read some inputs</a>";
     s += "<br>"; // Go to the next line.
     s += "<a href='/led/0'>Turn LED off</a>";
     s += "<br>"; // Go to the next line.
     s += "<a href='/led/1'>Turn LED on</a>";
     s += "<br>"; // Go to the next line.
-    s += "<a href='/motor/fwd'>Run motor Forward (closed 1 secs)</a>";
+    s += "<a href='/valve/open'>Open the valve (Energize)</a>";
     s += "<br>"; // Go to the next line.
-    s += "<a href='/motor/rev'>Run motor Reverse (open 1 secs)</a>";
-    s += "<br>"; // Go to the next line.
-    s += "<a href='/motor/close'>Closed the Blinds (Forward 12 secs)</a>";
-    s += "<br>"; // Go to the next line.
-    s += "<a href='/motor/open'>Open the Blinds (Reverse 12 secs)</a>";
+    s += "<a href='/valve/close'>Close the valve (De-Energize)</a>";
+//    s += "<br>"; // Go to the next line.
+//    s += "<a href='/motor/close'>Closed the Blinds (Forward 12 secs)</a>";
+//    s += "<br>"; // Go to the next line.
+//    s += "<a href='/motor/open'>Open the Blinds (Reverse 12 secs)</a>";
     
   }
   else if (val == -4)
   {
-    s += "Motor is running forward for 1 sec";
-//    digitalWrite(MOTOR_DIR, HIGH);
-//    delay(10);
-//    digitalWrite(MOTOR_RUN, HIGH);
-//    Serial.println("Running Forward");
-//    delay(1000);
-//    digitalWrite(MOTOR_RUN, LOW);
-//    digitalWrite(MOTOR_DIR, LOW);
+    s += "Valve is now Open";
+//    Open the Valve
   }
   else if (val == -5)
   {
-    s += "Motor is running reverse for 1 sec";
-//    digitalWrite(MOTOR_DIR, LOW);
-//    delay(10);
-//    digitalWrite(MOTOR_RUN, HIGH);
-//    Serial.println("Running Reverse");
-//    delay(1000);
-//    digitalWrite(MOTOR_RUN, LOW);
-//    digitalWrite(MOTOR_DIR, LOW);
+    s += "Valve is now Close";
+//    Close the Valve;
   }
-  else if (val == -6)
-  {
-    s += "Motor is running forward for 12 sec";
-//    String Direction = "Fwd";
-//    int Duration = stdDur;
-//    runMotor(Direction, Duration);
-  }
-    else if (val == -7)
-  {
-    s += "Motor is running reverse for 12 sec";
-//    String Direction = "Rev";
-//    int Duration = stdDur;
-//    runMotor(Direction, Duration);
-  }
+//  else if (val == -6)
+//  {
+//    s += "Motor is running forward for 12 sec";
+////    String Direction = "Fwd";
+////    int Duration = stdDur;
+////    runMotor(Direction, Duration);
+//  }
+//    else if (val == -7)
+//  {
+//    s += "Motor is running reverse for 12 sec";
+////    String Direction = "Rev";
+////    int Duration = stdDur;
+////    runMotor(Direction, Duration);
+//  }
   else
   {
     s += "Invalid Request.<br> Try <a href='/home'>/home</a> or <a href='/read'>/read.</a>";

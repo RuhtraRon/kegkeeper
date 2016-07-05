@@ -6,10 +6,10 @@ and the yellow sensor wire to pin #2
 
 **********************************************************/
 
-#include <Ticker.h>
+
 // which pin to use for reading the sensor? can use any pin!
 #define FLOWSENSORPIN 2
-Ticker ticker;
+
 
 // count how many pulses!
 volatile uint16_t pulses = 0;
@@ -36,28 +36,6 @@ void ISRflowreader() {
   flowrate = 1000.0;
   flowrate /= lastflowratetimer;  // in hertz
   lastflowratetimer = 0;
-}
-
-//void useInterrupt(boolean v) {
-//  if (v) {
-//    // Timer0 is already used for millis() - we'll just interrupt somewhere
-//    // in the middle and call the "Compare A" function above
-//    OCR0A = 0xAF;
-//    TIMSK0 |= _BV(OCIE0A);
-//  } else {
-//    // do not call the interrupt function COMPA anymore
-//    TIMSK0 &= ~_BV(OCIE0A);
-//  }
-//}
-
-void FMsetup() {
-   Serial.begin(115200);
-   Serial.print("Flow sensor test!");
-   pinMode(FLOWSENSORPIN, INPUT);
-   digitalWrite(FLOWSENSORPIN, HIGH);
-   lastflowpinstate = digitalRead(FLOWSENSORPIN);
-   ticker.attach_ms(1,ISRflowreader);
-//   useInterrupt(true);
 }
 
 void FMprint()
