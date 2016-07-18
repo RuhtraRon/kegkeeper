@@ -22,7 +22,7 @@
 //static const uint8_t D9   = 3;
 //static const uint8_t D10  = 1;
 
-const int LED_PIN = D4; // ESP's blue led
+const int LED_PIN = D0; // ESP's blue led
 //const int ANALOG_PIN = A0; // The only analog pin
 ADC_MODE(ADC_VCC);
 const int DIGITAL_PIN = D3; // Digital pin to be read

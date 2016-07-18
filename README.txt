@@ -1,15 +1,13 @@
-This is example code for using the Adafruit liquid flow meters. 
+# Keg Keeper
 
-Tested and works great with the Adafruit plastic and brass meters
-    ------> http://www.adafruit.com/products/828
-    ------> http://www.adafruit.com/products/833
+This project intends to control the flow of beer to a tap handle through use of a valve.  In addition flow will be monitored, with the future intent of reporting keg levels
 
-Connect the red wire to +5V, the black wire to common ground and the yellow sensor wire to pin #2
+# Major Compoents
 
-Adafruit invests time and resources providing this open source code, 
-please support Adafruit and open-source hardware by purchasing 
-products from Adafruit!
+NodeMCU Dev Board w/ Motor Shield
+	- http://www.banggood.com/Wifi-Car-Dedicated-NodeMcu-Lua-ESP8266-ESP-12E-WiFi-Motor-Drive-Expansion-Board-p-1021716.html
+Adafruit Plastic Valve
+	- https://www.adafruit.com/products/997
+Adafruit Plastic Flow Meter
+	- https://www.adafruit.com/products/828
 
-Written by Limor Fried/Ladyada  for Adafruit Industries.  
-BSD license, check license.txt for more information
-All text above must be included in any redistribution
