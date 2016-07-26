@@ -12,7 +12,7 @@
 //ADC_MODE(ADC_VCC);
 const int buttonPin = D3; // Digital pin to be read
 const int ledPin = BUILTIN_LED;
-const char* host = "192.168.1.35";
+const char* host = "192.168.1.79";
 int buttonState = 0;
 
 void initHardware()
@@ -57,21 +57,9 @@ void ArduinoOTAsetup(){
   Serial.println(WiFi.localIP());
 }
 
-void readButtonState(){
-  // read button state, HIGH when pressed, LOW when not
-   buttonState = digitalRead(buttonPin);
 
-  // if the push button pressed, do some action
-  if (buttonState == HIGH) {
-    return;
-  } 
-  else {
-    //flashLED(5, 1O0);
-    sendRequestToServer();
-  }
-}
 
-void sendRequestToServer(){
+void sendRequestToServer(String url){
   WiFiClient client;
   const int httpPort = 80;
   if (!client.connect(host, httpPort)) {
@@ -79,7 +67,7 @@ void sendRequestToServer(){
     return;
   }
   // This will send the request to the server
-  String url = "/valve/open";
+  
   client.print(String("GET ") + url + " HTTP/1.1\r\n" +
                "Host: " + host + "\r\n" + 
                "Connection: close\r\n\r\n");
@@ -100,6 +88,25 @@ void sendRequestToServer(){
   
   Serial.println();
   Serial.println("closing connection");
+}
+
+
+void readButtonState(){
+  // read button state, HIGH when pressed, LOW when not
+   buttonState = digitalRead(buttonPin);
+
+  // if the push button pressed, do some action
+  if (buttonState == HIGH) {
+    return;
+  } 
+  else {
+    //flashLED(5, 1O0);
+    String url = "/valve/open";
+    sendRequestToServer(url);
+    delay(10000);
+    url = "/valve/close";
+    sendRequestToServer(url);
+  }
 }
 
 void setup() 

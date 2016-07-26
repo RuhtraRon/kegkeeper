@@ -24,12 +24,12 @@
 
 //https://smartarduino.gitbooks.io/user-mannual-for-esp-12e-motor-shield/content/index.html
 
-const int LED_PIN = D0; // ESP's blue led
+const int LED_PIN = BUILTIN_LED;//D0; // ESP's blue led
 //const int ANALOG_PIN = A0; // The only analog pin
-ADC_MODE(ADC_VCC);
+//ADC_MODE(ADC_VCC);
 const int DIGITAL_PIN = D5; // Digital pin to be read
 const int OPEN_VALVE = D1;
-const int MOTOR_DIR = D3;
+//const int MOTOR_DIR = D3;
 
 WiFiServer server(80);
 Ticker ticker;
@@ -40,10 +40,10 @@ void initHardware()
   pinMode(DIGITAL_PIN, INPUT_PULLUP);
   pinMode(LED_PIN, OUTPUT);
   pinMode(OPEN_VALVE, OUTPUT);
-  pinMode(MOTOR_DIR, OUTPUT);
+//  pinMode(MOTOR_DIR, OUTPUT);
   digitalWrite(LED_PIN, HIGH); // Turn led off
   digitalWrite(OPEN_VALVE, LOW); // turn valve off (closed)
-  digitalWrite(MOTOR_DIR, LOW); // turn valve off (closed)
+//  digitalWrite(MOTOR_DIR, LOW); // turn valve off (closed)
   pinMode(FLOWSENSORPIN, INPUT);
   digitalWrite(FLOWSENSORPIN, HIGH);
   lastflowpinstate = digitalRead(FLOWSENSORPIN);
@@ -86,7 +86,7 @@ void ArduinoOTAsetup(){
 void setup() 
 {
   initHardware();
-  ticker.attach_ms(1,ISRflowreader);
+//  ticker.attach_ms(1,ISRflowreader);
   WiFiManager wifiManager;
 //  //reset settings - for testing
 //  wifiManager.resetSettings();
@@ -181,12 +181,15 @@ void loop()
   {
     s += "Valve is now Open";
 //    Open the Valve
+//    digitalWrite(MOTOR_DIR, LOW);
     digitalWrite(OPEN_VALVE, HIGH);
+    
   }
   else if (val == -5)
   {
     s += "Valve is now Close";
 //    Close the Valve;
+//    digitalWrite(MOTOR_DIR, LOW);
     digitalWrite(OPEN_VALVE, LOW);
   }
 //  else if (val == -6)
